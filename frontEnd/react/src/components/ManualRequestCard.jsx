@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { getScore } from '../api/services/formServices';
 import '../App.css'; // Para o spinner
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css'; // Importe o CSS do toastify
 
 const ManualRequestCard = () => {
     const [cpf, setCpf] = useState('');
@@ -15,12 +17,32 @@ const ManualRequestCard = () => {
         setResult(null);
         setError(null);
 
+        // 1. Criamos a promise aqui, sem o 'await' ainda.
+        // Isso nos dá o objeto da promise para passar ao toast.
+        const scorePromise = getScore(cpf, clientId);
+
+        // 2. Usamos o toast.promise para mostrar o status.
+        // Ele vai automaticamente atualizar o toast quando a promise for resolvida.
+        toast.promise(
+            scorePromise,
+            {
+                pending: 'Consultando score...',
+                success: 'Consulta realizada com sucesso!',
+                error: 'Ocorreu um erro ao consultar o score.'
+            }
+        );
+
         try {
-            const data = await getScore(cpf, clientId);
+            // 3. Agora usamos o 'await' na mesma promise para obter os dados
+            // e atualizar o estado do componente.
+            const data = await scorePromise;
             setResult(data);
         } catch (err) {
+            // O toast.promise já mostrou o erro, aqui só atualizamos o estado local.
             setError(err.message);
+            console.error("Erro detalhado:", err);
         } finally {
+            // O loading do botão pode ser desativado independentemente do resultado.
             setLoading(false);
         }
     };
@@ -74,7 +96,10 @@ const ManualRequestCard = () => {
                     <p className="mt-2 text-sm text-red-200">{error}</p>
                 </div>
             )}
+            {/* O ToastContainer pode ficar aqui ou no seu App.js principal */}
+            <ToastContainer theme="dark" position="top-right" autoClose={5000} hideProgressBar={false} />
         </div>
+
     );
 };
 

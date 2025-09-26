@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { LineChart, Activity, Server, CheckCircle, AlertCircle, XCircle } from 'lucide-react';
+import { LineChart, Activity, Server, CheckCircle, AlertCircle, XCircle, Timer } from 'lucide-react';
 import { getDashboardMetrics } from '../api/services/formServices';
 
 // Componente para um item individual da métrica, para não repetir código
@@ -20,6 +20,7 @@ const MetricsCard = () => {
     requests_failed_total: 0,
     requests_dropped_total: 0,
     queue_size_current: 0,
+    average_latency_seconds: 0, // Adiciona o estado inicial para a latência
   });
   const [error, setError] = useState(null);
 
@@ -36,7 +37,7 @@ const MetricsCard = () => {
     };
 
     fetchMetrics(); // Busca na primeira vez
-    const intervalId = setInterval(fetchMetrics, 2000); // E depois a cada 2 segundos
+    const intervalId = setInterval(fetchMetrics, 500); // E depois a cada 2 segundos
 
     return () => clearInterval(intervalId); // Limpa o intervalo quando o componente é desmontado
   }, []);
@@ -57,6 +58,8 @@ const MetricsCard = () => {
           <MetricItem icon={CheckCircle} label="Sucessos" value={metrics.requests_successful_total} color="text-green-400" />
           <MetricItem icon={AlertCircle} label="Falhas" value={metrics.requests_failed_total} color="text-red-400" />
           <MetricItem icon={XCircle} label="Descartadas (Fila Cheia)" value={metrics.requests_dropped_total} color="text-orange-400" />
+          {/* --- NOVA LINHA DE MÉTRICA --- */}
+          <MetricItem icon={Timer} label="Latência Média (s)" value={`${metrics.average_latency_seconds}s`} color="text-purple-400" />
         </div>
       )}
     </div>

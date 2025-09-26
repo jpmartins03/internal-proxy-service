@@ -2,9 +2,6 @@ import queue
 from abc import ABC, abstractmethod
 
 class AbstractQueueStrategy(ABC):
-    """
-    Define a interface comum para todas as nossas estratégias de fila.
-    """
     def __init__(self, maxsize):
         self.maxsize = maxsize
         self._queue = self._create_queue()
@@ -16,7 +13,6 @@ class AbstractQueueStrategy(ABC):
     def get(self):
         return self._queue.get()
 
-    # Adicionamos 'tie_breaker' na assinatura do método
     def put_nowait(self, item, priority=None, tie_breaker=0):
         self._put_item(item, priority, tie_breaker)
 
@@ -45,12 +41,9 @@ class PriorityStrategy(AbstractQueueStrategy):
             priority_num = int(priority)
         except (ValueError, TypeError):
             priority_num = 10
-        
-        # A tupla agora é (prioridade, desempate, item)
-        # A fila de prioridade usará o 'tie_breaker' para desempatar quando as prioridades forem iguais.
+
         self._queue.put_nowait((priority_num, tie_breaker, item))
 
     def get(self):
-        # Desempacota a tupla completa e retorna apenas o item
         _priority, _tie_breaker, item = self._queue.get()
         return item

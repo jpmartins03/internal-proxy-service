@@ -38,17 +38,30 @@ const BulkRequestCard = ({ strategy }) => {
         setResults(initialResults);
 
         const currentPriority = strategy === 'PRIORITY' ? priority : null;
-        const promises = cpfList.map(cpf => getScore(cpf, clientId, currentPriority));
+        
+        // --- LÓGICA CORRIGIDA E DEFINITIVA ---
+        // 1. Dispara todas as requisições em paralelo.
+        // A função .map executa todas as chamadas getScore imediatamente.
+        cpfList.forEach((cpf, index) => {
+            getScore(cpf, clientId, currentPriority)
+                .then(data => {
+                    // Sucesso: atualiza o item específico na lista de resultados
+                    setResults(prev => prev.map((r, i) => 
+                        i === index ? { ...r, status: 'success', data } : r
+                    ));
+                })
+                .catch(error => {
+                    // Falha: atualiza o item específico com a mensagem de erro
+                    setResults(prev => prev.map((r, i) => 
+                        i === index ? { ...r, status: 'error', error: error.message } : r
+                    ));
+                });
+        });
 
-        for (let i = 0; i < promises.length; i++) {
-            try {
-                const data = await promises[i];
-                setResults(prev => prev.map(r => r.id === initialResults[i].id ? { ...r, status: 'success', data } : r));
-            } catch (error) {
-                setResults(prev => prev.map(r => r.id === initialResults[i].id ? { ...r, status: 'error', error: error.message } : r));
-            }
-        }
+        // 2. O botão de loading é desativado imediatamente após o disparo,
+        // pois não estamos mais esperando (await) que todas terminem aqui.
         setIsLoading(false);
+        // --------------------------------------------------
     };
 
     const handleToggleResult = (id) => {
@@ -140,3 +153,4 @@ const BulkRequestCard = ({ strategy }) => {
     );
 };
 export default BulkRequestCard;
+

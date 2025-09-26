@@ -1,16 +1,18 @@
-import queue
+import os
 import threading
 import time
-from ..utils import metrics # Importa nossas métricas
+# Agora só precisamos da PriorityStrategy, pois ela cobre o caso FIFO
+from .strategies import PriorityStrategy
+from ..utils import metrics
 
-REQUEST_QUEUE = queue.Queue(maxsize=100)
+# A fila agora é SEMPRE de prioridade. Isso simplifica o código e dá o controle ao frontend.
+QUEUE_MAX_SIZE = int(os.getenv("QUEUE_MAX_SIZE", 100))
+REQUEST_QUEUE = PriorityStrategy(maxsize=QUEUE_MAX_SIZE)
 
 def worker_loop():
-    print("🤖 Worker iniciado e aguardando tarefas na fila...")
+    print("🤖 Worker (Priority Queue) iniciado e aguardando tarefas na fila...")
     while True:
-        # Atualiza o medidor com o tamanho atual da fila ANTES de pegar um item
         metrics.QUEUE_SIZE.set(REQUEST_QUEUE.qsize())
-        
         command = REQUEST_QUEUE.get()
         try:
             print(f"📥 Command recebido. Processando...")
@@ -21,10 +23,9 @@ def worker_loop():
             if hasattr(command, 'future'):
                 command.future.set_exception(e)
         finally:
-            # Garante que a tarefa seja marcada como concluída e a métrica da fila seja atualizada
             REQUEST_QUEUE.task_done()
             metrics.QUEUE_SIZE.set(REQUEST_QUEUE.qsize())
-            time.sleep(1) # Mantém o rate limit
+            time.sleep(1)
 
 def start_worker():
     print("Iniciando a thread do worker...")

@@ -1,20 +1,20 @@
 from flask import Flask
-from flask_cors import CORS # Importa a biblioteca
+from flask_cors import CORS
 
 def create_app():
-    """
-    Esta é a "Application Factory".
-    Ela cria e configura a aplicação Flask.
-    """
+    
+    #configuação da aplicação do flask
     app = Flask(__name__)
 
-    # --- CONFIGURAÇÃO DO CORS ---
-    # Esta linha permite que qualquer origem (*) acesse sua API.
+    # CONFIGURAÇÃO DO CORS
+    # ---------------------------------------------------------------------------------------------
+    # Esta linha permite que qualquer origem (*) acesse a API.
     # É seguro para desenvolvimento.
     CORS(app)
-    # --------------------------
+    # ---------------------------------------------------------------------------------------------
 
-    # Inicia o nosso worker em segundo plano
+    # essa função inicia o crador de threads em segundo plano que vai ficar "ouvindo" se uma requisi
+    #ção chega na fila
     from .core.queue_worker import start_worker
     start_worker()
 

@@ -35,7 +35,6 @@ class PriorityStrategy(AbstractQueueStrategy):
     def _create_queue(self):
         return queue.PriorityQueue(self.maxsize)
 
-    # O método agora aceita o 'tie_breaker'
     def _put_item(self, item, priority=10, tie_breaker=0):
         try:
             priority_num = int(priority)

@@ -8,7 +8,7 @@ import BulkRequestCard from './components/BulkRequestCard';
 import MetricsCard from './components/MetricsCard';
 import ManualRequestCard from './components/ManualRequestCard';
 import StrategySelector from './components/StrategySelector';
-import CircuitBreakerCard from './components/CircuitBreakerCard'; // <-- NOVO IMPORT
+import CircuitBreakerCard from './components/CircuitBreakerCard';
 
 function App() {
   const [strategy, setStrategy] = useState('FIFO');
@@ -38,7 +38,7 @@ function App() {
         <div className="space-y-8">
           <HealthCheckCard />
           <MetricsCard />
-          <CircuitBreakerCard /> {/* <-- NOVO CARD ADICIONADO AQUI */}
+          <CircuitBreakerCard />
         </div>
 
       </div>

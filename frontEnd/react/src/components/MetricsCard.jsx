@@ -20,7 +20,7 @@ const MetricsCard = () => {
     requests_failed_total: 0,
     requests_dropped_total: 0,
     queue_size_current: 0,
-    average_latency_seconds: 0, // Adiciona o estado inicial para a latência
+    average_latency_seconds: 0,
   });
   const [error, setError] = useState(null);
 
@@ -39,7 +39,7 @@ const MetricsCard = () => {
     fetchMetrics(); // Busca na primeira vez
     const intervalId = setInterval(fetchMetrics, 500); // E depois a cada 2 segundos
 
-    return () => clearInterval(intervalId); // Limpa o intervalo quando o componente é desmontado
+    return () => clearInterval(intervalId);
   }, []);
 
   return (

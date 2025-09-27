@@ -38,16 +38,20 @@ const BulkRequestCard = ({ strategy }) => {
         setResults(initialResults);
 
         const currentPriority = strategy === 'PRIORITY' ? priority : null;
-        const promises = cpfList.map(cpf => getScore(cpf, clientId, currentPriority));
-
-        for (let i = 0; i < promises.length; i++) {
-            try {
-                const data = await promises[i];
-                setResults(prev => prev.map(r => r.id === initialResults[i].id ? { ...r, status: 'success', data } : r));
-            } catch (error) {
-                setResults(prev => prev.map(r => r.id === initialResults[i].id ? { ...r, status: 'error', error: error.message } : r));
-            }
-        }
+        
+        cpfList.forEach((cpf, index) => {
+            getScore(cpf, clientId, currentPriority)
+                .then(data => {
+                    setResults(prev => prev.map((r, i) => 
+                        i === index ? { ...r, status: 'success', data } : r
+                    ));
+                })
+                .catch(error => {
+                    setResults(prev => prev.map((r, i) => 
+                        i === index ? { ...r, status: 'error', error: error.message } : r
+                    ));
+                });
+        });
         setIsLoading(false);
     };
 
@@ -140,3 +144,4 @@ const BulkRequestCard = ({ strategy }) => {
     );
 };
 export default BulkRequestCard;
+

@@ -1,12 +1,12 @@
 import os
 import threading
 import time
-# Agora só precisamos da PriorityStrategy, pois ela cobre o caso FIFO
 from .strategies import PriorityStrategy
 from ..utils import metrics
 
-# A fila agora é SEMPRE de prioridade. Isso simplifica o código e dá o controle ao frontend.
 QUEUE_MAX_SIZE = int(os.getenv("QUEUE_MAX_SIZE", 100))
+# Lê o tempo de delay do rate limiter do ambiente
+RATE_LIMIT_SECONDS = float(os.getenv("RATE_LIMIT_SECONDS", 1.0))
 REQUEST_QUEUE = PriorityStrategy(maxsize=QUEUE_MAX_SIZE)
 
 def worker_loop():
@@ -21,11 +21,13 @@ def worker_loop():
         except Exception as e:
             print(f"🔥🔥🔥 ERRO CRÍTICO NO WORKER: {e}")
             if hasattr(command, 'future'):
+                metrics.REQUESTS_FAILED_TOTAL.inc()
                 command.future.set_exception(e)
         finally:
             REQUEST_QUEUE.task_done()
             metrics.QUEUE_SIZE.set(REQUEST_QUEUE.qsize())
-            time.sleep(1)
+            # Usa o delay lido do ambiente
+            time.sleep(RATE_LIMIT_SECONDS)
 
 def start_worker():
     print("Iniciando a thread do worker...")
